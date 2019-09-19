@@ -1,9 +1,10 @@
 %% Create Oscillator
-Time = 4;
+Time = 6;
 frequency = 220;
 [Oscillator1,fs] = SawOscillator(Time,frequency,0.5);
 [Oscillator2] = SawOscillator(Time,frequency-1,0.5);
 [Oscillator3] = SawOscillator(Time,frequency/2,0.1);
+plot(Oscillator1);
 
 [Comb1_2] = CombineOscillator(Oscillator1,Oscillator2,0.5);
 [MoogSound] = CombineOscillator(Comb1_2,Oscillator3,0.5);
@@ -28,13 +29,21 @@ playblocking(p);
 
 %%
 clear ASDR
-AttackTime = Time/2;
-SustainTime = Time/6;
-DecayTime = Time/6;
-ReleaseTime =Time/6;
+close all
+AttackTime = 2;
+SustainTime = 1.9;
+DecayTime = 0.1;
+ReleaseTime =1;
 MaxAmplitude =1;
-ASDR = ASDR(AttackTime,SustainTime,DecayTime,ReleaseTime,MaxAmplitude);
-%FilteredSound = FilteredSound.*ASDR;
-plot(FilteredSound)
-p=audioplayer(FilteredSound, fs);
-playblocking(p);
+SustainAmplitude = 0.2;
+ASDR = ASDR(AttackTime,SustainTime,DecayTime,ReleaseTime,MaxAmplitude,SustainAmplitude);
+PAD = length(FilteredSound(1,:)) - length(ASDR(1,:));
+ASDR = [ASDR zeros(1,PAD)];
+plot(MoogSound)
+MoogSound = MoogSound.*ASDR;
+figure,
+plot(MoogSound)
+figure,
+plot(ASDR)
+p=audioplayer(MoogSound, fs);
+%playblocking(p);

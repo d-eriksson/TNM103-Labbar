@@ -1,0 +1,24 @@
+Fs = 44100;
+dt = 1/44100;
+AudioLength = 3;
+t = (0:dt:AudioLength-dt);
+f0 = sin(2*pi*195*t);
+f = [370 950 2670];
+A = [db2mag(-3) db2mag(-19) db2mag(-43)];
+audio = wgn(1,Fs*AudioLength,1);
+%audio = sin(2*pi*t.*195+A(1)*sin(2*pi*t.*f(1)+A(2)*sin(2*pi*t.*f(2)+A(3)*sin(2*pi*t.*f(3))))); 
+[b1,a1] = butter(2,[f(1)-f(1)*0.1 f(1)+f(1)*0.1]/(Fs/2));
+[b2,a2] = butter(2,[f(2)-f(2)*0.07 f(2)+f(2)*0.07]/(Fs/2));
+[b3,a3] = butter(2,[f(3)-f(3)*0.05 f(3)+f(3)*0.05]/(Fs/2));
+audiof1 = filter(b1,a1,audio);
+audiof2 = filter(b2,a2,audio);
+audiof3 = filter(b3,a3,audio);
+
+Mix = f0 + A(1)*audiof1 + A(2)*audiof2 + A(3)*audiof3;
+fadeInTime = 1000;
+fadeIn = linspace(0,1,Fs*fadeInTime/1000);
+fadeOut = fliplr(fadeIn);
+Mix(1,1:length(fadeIn)) = Mix(1,1:length(fadeIn)).*fadeIn;
+Mix(1,length(Mix)+1-length(fadeOut):length(Mix)) = Mix(1,length(Mix)+1-length(fadeOut):length(Mix)).*fadeOut;
+p = audioplayer(Mix, Fs); 
+playblocking(p);
